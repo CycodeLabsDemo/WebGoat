@@ -1,5 +1,6 @@
+
 /*
- * SPDX-FileCopyrightText: Copyright © 2017 WebGoat authors
+ * SPDX-FileCopyrightText: Copyright 2017 WebGoat authors
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 package org.owasp.webgoat.lessons.sqlinjection.mitigation;
@@ -45,6 +46,14 @@ public class Servers {
   public List<Server> sort(@RequestParam String column) throws Exception {
     List<Server> servers = new ArrayList<>();
 
+    // Whitelist of allowed column names
+    String[] allowedColumns = {"id", "hostname", "ip", "mac", "status", "description"};
+
+    // Validate the column parameter against the whitelist
+    if (!isValidColumn(column, allowedColumns)) {
+      throw new Exception("Invalid column name: " + column);
+    }
+
     try (var connection = dataSource.getConnection()) {
       try (var statement =
           connection.prepareStatement(
@@ -67,5 +76,14 @@ public class Servers {
       }
     }
     return servers;
+  }
+
+  private boolean isValidColumn(String column, String[] allowedColumns) {
+    for (String allowedColumn : allowedColumns) {
+      if (column.equalsIgnoreCase(allowedColumn)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
