@@ -45,12 +45,29 @@ public class Servers {
   public List<Server> sort(@RequestParam String column) throws Exception {
     List<Server> servers = new ArrayList<>();
 
+    String orderByColumn;
+    if ("id".equals(column)) {
+      orderByColumn = "id";
+    } else if ("hostname".equals(column)) {
+      orderByColumn = "hostname";
+    } else if ("ip".equals(column)) {
+      orderByColumn = "ip";
+    } else if ("mac".equals(column)) {
+      orderByColumn = "mac";
+    } else if ("status".equals(column)) {
+      orderByColumn = "status";
+    } else if ("description".equals(column)) {
+      orderByColumn = "description";
+    } else {
+      throw new IllegalArgumentException("Unknown sort column: " + column);
+    }
+
     try (var connection = dataSource.getConnection()) {
       try (var statement =
           connection.prepareStatement(
               "select id, hostname, ip, mac, status, description from SERVERS where status <> 'out"
                   + " of order' order by "
-                  + column)) {
+                  + orderByColumn)) {
         try (var rs = statement.executeQuery()) {
           while (rs.next()) {
             Server server =
