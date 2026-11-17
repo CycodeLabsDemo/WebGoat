@@ -58,22 +58,11 @@ public class SqlInjectionLesson5 implements AssignmentEndpoint {
   }
 
   protected AttackResult injectableQuery(String query) {
-    try (Connection connection = dataSource.getConnection()) {
-      try (Statement statement =
-          connection.createStatement(
-              ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
-        statement.executeQuery(query);
-        if (checkSolution(connection)) {
-          return success(this).build();
-        }
-        return failed(this).output("Your query was: " + query).build();
-      }
-    } catch (Exception e) {
-      return failed(this)
-          .output(
-              this.getClass().getName() + " : " + e.getMessage() + "<br> Your query was: " + query)
-          .build();
-    }
+    // SECURITY FIX: user-supplied text is no longer executed as SQL.
+    // Parameterization cannot make arbitrary user-written SQL safe, so the request is rejected.
+    return failed(this)
+        .output("Executing user-supplied SQL is disabled for security reasons.")
+        .build();
   }
 
   private boolean checkSolution(Connection connection) {
